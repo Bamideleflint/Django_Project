@@ -68,13 +68,48 @@ python manage.py runserver
 
 Visit http://localhost:8000
 
-### Using Docker
+## 🐳 Docker Management
+
+### Start Containers
 
 ```bash
 docker-compose up
 ```
 
 Visit http://localhost:8000
+
+### Stop Containers & Clean Up
+
+#### Quick Cleanup (Recommended)
+
+```bash
+# Run the Docker cleanup script
+bash cleanup-docker.sh
+```
+
+#### Manual Cleanup
+
+```bash
+# Stop containers
+docker-compose down
+
+# Remove unused images
+docker image prune -a
+
+# Remove unused volumes
+docker volume prune
+
+# Complete cleanup (frees most space)
+docker system prune -a --volumes
+```
+
+**What gets removed:**
+- ✅ Stopped containers
+- ✅ Unused images
+- ✅ Unused volumes
+- ✅ Unused networks
+
+**Disk space saved:** Can free up several GB depending on usage
 
 ## 🧪 Testing
 
@@ -100,12 +135,52 @@ python manage.py test core.tests.HomeViewTests
 
 ## 🏗️ Infrastructure Deployment
 
+### Deploy to AWS
+
 ```bash
 cd terraform
 terraform init
 terraform plan
 terraform apply
 ```
+
+### ⚠️ **IMPORTANT: Stopping AWS Resources to Avoid Charges**
+
+**AWS resources incur costs while running!** To avoid unexpected charges:
+
+#### Quick Cleanup (Recommended)
+
+```bash
+# Run the cleanup script
+bash cleanup-aws.sh
+```
+
+#### Manual Cleanup
+
+```bash
+# Navigate to terraform directory
+cd terraform
+
+# Destroy all AWS resources
+terraform destroy
+
+# Confirm with 'yes' when prompted
+```
+
+**What gets destroyed:**
+- ✅ EC2 instances (stops billing immediately)
+- ✅ Security groups
+- ✅ All associated resources
+
+**Verify cleanup on AWS Console:**
+1. Go to AWS EC2 Dashboard
+2. Check "Instances" - should show 0 running
+3. Check "Security Groups" - project SG should be removed
+4. Check billing dashboard for confirmation
+
+**💰 Cost Estimate:**
+- t2.micro EC2: ~$0.0116/hour (~$8.50/month if left running)
+- **Always destroy when not in use!**
 
 ## 📁 Project Structure
 
@@ -172,6 +247,51 @@ Django_Project/
 5. ✅ Django system check
 
 View pipeline status in the **Actions** tab on GitHub.
+
+## 💰 Cost Management & Cleanup
+
+### Before You Leave This Project:
+
+**To avoid AWS charges, ALWAYS clean up resources:**
+
+```bash
+# 1. Destroy AWS infrastructure
+bash cleanup-aws.sh
+# OR manually: cd terraform && terraform destroy
+
+# 2. Clean up Docker (optional, for disk space)
+bash cleanup-docker.sh
+# OR manually: docker-compose down && docker system prune -a
+```
+
+### Cost Breakdown:
+
+**AWS Costs (if left running):**
+- EC2 t2.micro: ~$8.50/month
+- Data transfer: Variable
+- **Total if forgotten: $10-15/month** ⚠️
+
+**Docker:**
+- No cloud costs
+- Only uses local disk space
+- Can be cleaned up anytime
+
+### Cleanup Checklist:
+
+- [ ] Run `terraform destroy` to remove all AWS resources
+- [ ] Verify EC2 console shows 0 running instances
+- [ ] Run `docker-compose down` to stop containers
+- [ ] (Optional) Run `docker system prune -a` to free disk space
+- [ ] Check AWS billing dashboard after 24 hours
+
+### When to Clean Up:
+
+✅ **After testing/development session**  
+✅ **Before taking a break from the project**  
+✅ **When switching to another project**  
+✅ **At end of day (for AWS resources)**  
+
+⚠️ **AWS charges even when you're not using the resources!**
 
 ## ⚠️ Important Notes
 
